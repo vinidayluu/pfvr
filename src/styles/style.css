@@ -1,0 +1,241 @@
+/* Estilo geral */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* Estilo específico para a página de login */
+body.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+
+    background-image: url('./imagens/fachada.jpg'); /* Caminho relativo correto */
+    background-size: cover; /* Faz a imagem cobrir toda a tela */
+    background-position: center; /* Centraliza a imagem */
+    background-repeat: no-repeat; /* Evita que a imagem se repita */
+}
+
+.container {
+    width: 300px;
+    margin: 100px auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.39);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.news-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.login-container {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9); /* Fundo branco com transparência */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 300px; /* Define a largura do contêiner */
+}
+
+.login-container img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #555;
+}
+
+input {
+    display: block;
+    width: 90%; /* Reduz a largura das caixas de entrada */
+    padding: 8px; /* Reduz o preenchimento interno */
+    margin: 10px auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px; /* Reduz o tamanho da fonte */
+}
+
+input::placeholder {
+    color: #aaa; /* Cor do texto do placeholder */
+    font-size: 14px;
+}
+
+button {
+    padding: 8px 16px; /* Reduz o tamanho do botão */
+    background-color: #bb2020;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px; /* Reduz o tamanho da fonte */
+}
+
+button:hover {
+    background-color: #db2323;
+}
+
+.logout-button {
+    background-color: #cc2323;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.logout-button:hover {
+    background-color: #bd2020;
+}
+
+.welcome {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Estilo para o contêiner de notícias */
+#newsList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Layout responsivo */
+    gap: 20px; /* Espaçamento entre os cartões */
+    margin-top: 20px;
+}
+
+/* Estilo para a notícia principal */
+.main-news {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.main-news img {
+    width: 100%; /* A largura ocupa todo o espaço disponível */
+    height: auto; /* A altura é ajustada automaticamente */
+    object-fit: contain; /* Garante que a imagem seja exibida inteira sem cortes */
+    border-radius: 8px; /* Bordas arredondadas para um visual mais moderno */
+}
+
+.main-news h2 {
+    font-size: 24px;
+    margin: 15px;
+    color: #333;
+}
+
+.main-news p {
+    font-size: 16px;
+    margin: 0 15px 15px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Estilo para a grade de notícias */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Estilo para cada notícia (card) */
+.news-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.news-item:hover {
+    transform: translateY(-5px); /* Elevação ao passar o mouse */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilo para as imagens e vídeos */
+.news-item img, .news-item video, .main-news img, .main-news video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+/* Estilo para o conteúdo da notícia */
+.news-item h3 {
+    font-size: 18px;
+    margin: 15px;
+    color: #333;
+}
+
+.news-item p {
+    font-size: 14px;
+    margin: 0 15px 15px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Botão de apagar (apenas para admin) */
+.news-item .delete-button {
+    display: block;
+    margin: 10px auto;
+    padding: 8px 16px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+}
+
+.news-item .delete-button:hover {
+    background-color: #ff1a1a;
+}
+
+#error-message {
+    margin-top: 10px;
+    font-size: 14px;
+    color: red;
+}
+
+/* Estilo para vídeos responsivos */
+.responsive-video {
+    width: 100%;
+    max-width: 800px; /* Define um tamanho máximo */
+    aspect-ratio: 16 / 9; /* Mantém a proporção 16:9 */
+    margin: 20px auto; /* Centraliza o vídeo */
+    display: block; /* Garante que o iframe seja tratado como um bloco */
+    border-radius: 10px; /* Adiciona bordas arredondadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adiciona uma sombra para destacar */
+}

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Notícias</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <div class="news-container">
+        <!-- Botão de Logout -->
+        <button id="logoutButton" class="logout-button">Logout</button>
+        <h1 id="welcomeMessage">Bem-vindo ao Portal de Notícias!</h1>
+        <!-- Formulário para adicionar notícias (apenas para admin) -->
+        <form id="newsForm" style="display: none;">
+            <h2>Adicionar Notícia</h2>
+            <label for="newsTitle">Título:</label>
+            <input type="text" id="newsTitle" required>
+            
+            <!-- Campo para URL da imagem -->
+            <label for="newsImageUrl">URL da Imagem:</label>
+            <input type="text" id="newsImageUrl" placeholder="https://exemplo.com/imagem.jpg">
+            
+            <!-- Campo para upload de imagem local -->
+            <label for="newsImageFile">Ou selecione uma imagem:</label>
+            <input type="file" id="newsImageFile" accept="image/*">
+            
+            <!-- Campo para URL de vídeo -->
+            <label for="newsVideoUrl">URL do Vídeo:</label>
+            <input type="text" id="newsVideoUrl" placeholder="https://exemplo.com/video.mp4">
+            
+            <!-- Novo campo para URL do YouTube -->
+            <label for="youtubeVideoUrl">URL do YouTube:</label>
+            <input type="text" id="youtubeVideoUrl" placeholder="https://www.youtube.com/watch?v=exemplo" />
+
+            <!-- Campo para upload de vídeo local -->
+            <label for="newsVideoFile">Ou selecione um vídeo:</label>
+            <input type="file" id="newsVideoFile" accept="video/*">
+            
+            <label for="newsContent">Conteúdo:</label>
+            <textarea id="newsContent" rows="4" required></textarea>
+            <button type="submit">Adicionar Notícia</button>
+        </form>
+        <!-- Notícia Principal -->
+        <div id="mainNews" class="main-news" style="display: none;">
+            <!-- A notícia principal será adicionada dinamicamente -->
+        </div>
+        <!-- Lista de Notícias -->
+        <div id="newsList" class="news-grid">
+            <!-- As notícias serão adicionadas aqui dinamicamente -->
+        </div>
+    </div>
+    <h1>Salvar URLs de Vídeos do YouTube</h1>
+    <form id="videoForm">
+        <label for="videoUrl">URL do Vídeo:</label>
+        <input type="url" id="videoUrl" name="videoUrl" required>
+        <button type="submit">Salvar</button>
+    </form>
+
+    <h2>Vídeos Salvos:</h2>
+    <ul id="videoList"></ul>
+
+    <h1>Publicar Imagens</h1>
+    <form id="imageForm">
+        <label for="imageUrl">URL da Imagem:</label>
+        <input type="url" id="imageUrl" name="imageUrl" required>
+        <button type="submit">Publicar</button>
+    </form>
+
+    <h2>Imagens Publicadas:</h2>
+    <div id="imageGallery"></div>
+
+    <script src="scripts/news.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCO6yeeeUwV13t6ZDBHUgdopZLreuvXpzU",
+            authDomain: "etectcc-74ed1.firebaseapp.com",
+            databaseURL: "https://etectcc-74ed1-default-rtdb.firebaseio.com",
+            projectId: "etectcc-74ed1",
+            storageBucket: "etectcc-74ed1.firebasestorage.app",
+            messagingSenderId: "193812584474",
+            appId: "1:193812584474:web:ecdb417609b2adb7f899a3",
+            measurementId: "G-CJB37DTED0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        // Função para validar URLs do YouTube
+        function isValidYouTubeUrl(url) {
+            const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|.+\?v=)?([a-zA-Z0-9_-]{11})/;
+            const isValid = youtubeRegex.test(url);
+            console.log('Validando URL:', url, 'Resultado:', isValid);
+            return isValid;
+        }
+
+        // Função para extrair o ID do vídeo do YouTube
+        function extractYouTubeVideoId(url) {
+            const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|.+\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            const videoId = match ? match[1] : null;
+            console.log('Extraindo ID do vídeo:', url, 'ID:', videoId);
+            return videoId;
+        }
+
+        // Adicionar evento de validação e publicação ao formulário
+        const newsForm = document.getElementById('newsForm');
+        newsForm.addEventListener('submit', function (event) {
+            event.preventDefault(); // Impede o envio do formulário padrão
+
+            // Captura a URL do YouTube inserida
+            const youtubeUrl = document.getElementById('youtubeVideoUrl').value.trim();
+
+            // Log para depuração
+            console.log('URL do YouTube inserida:', youtubeUrl);
+
+            // Valida a URL do YouTube
+            if (!isValidYouTubeUrl(youtubeUrl)) {
+                alert('Por favor, insira uma URL válida do YouTube.');
+                return;
+            }
+
+            // Extrai o ID do vídeo do YouTube
+            const videoId = extractYouTubeVideoId(youtubeUrl);
+            if (!videoId) {
+                alert('Não foi possível extrair o ID do vídeo do YouTube.');
+                return;
+            }
+
+            // Verifica se o vídeo já foi adicionado
+            const existingIframes = document.querySelectorAll('#newsList iframe');
+            for (const iframe of existingIframes) {
+                if (iframe.src.includes(videoId)) {
+                    alert('Este vídeo já foi adicionado.');
+                    return;
+                }
+            }
+
+            // Cria o embed URL
+            const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            console.log('URL embed gerada:', embedUrl);
+
+            // Cria um iframe para exibir o vídeo
+            const iframe = document.createElement('iframe');
+            iframe.src = embedUrl;
+            iframe.width = "560";
+            iframe.height = "315";
+            iframe.frameBorder = "0";
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            iframe.allowFullscreen = true;
+
+            // Adiciona o iframe à lista de notícias
+            const newsList = document.getElementById('newsList');
+            const newsItem = document.createElement('div');
+            newsItem.className = 'news-item';
+            newsItem.appendChild(iframe);
+            newsList.appendChild(newsItem);
+
+            // Limpa o campo de URL do YouTube após a publicação
+            document.getElementById('youtubeVideoUrl').value = '';
+
+            // Log para depuração
+            console.log('Vídeo publicado com sucesso!');
+        });
+
+        const videoForm = document.getElementById("videoForm");
+        const videoList = document.getElementById("videoList");
+
+        // Enviar URL para o servidor
+        videoForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const url = document.getElementById("videoUrl").value;
+
+            const response = await fetch("/save-video-url", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ url }),
+            });
+
+            if (response.ok) {
+                alert("URL salva com sucesso!");
+                videoForm.reset();
+                loadVideoUrls(); // Atualizar a lista de URLs
+            } else {
+                alert("Erro ao salvar a URL.");
+            }
+        });
+
+        // Carregar URLs salvas do servidor
+        async function loadVideoUrls() {
+            const response = await fetch("/video-urls");
+            const urls = await response.json();
+
+            videoList.innerHTML = "";
+            urls.forEach((url) => {
+                const li = document.createElement("li");
+                li.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+                videoList.appendChild(li);
+            });
+        }
+
+        // Carregar URLs ao abrir a página
+        loadVideoUrls();
+
+        const imageForm = document.getElementById("imageForm");
+        const imageGallery = document.getElementById("imageGallery");
+
+        // Enviar URL da imagem para o servidor
+        imageForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const url = document.getElementById("imageUrl").value;
+
+            const response = await fetch("/save-image", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ url }),
+            });
+
+            if (response.ok) {
+                alert("Imagem publicada com sucesso!");
+                imageForm.reset();
+                loadImages(); // Atualizar a galeria de imagens
+            } else {
+                alert("Erro ao publicar a imagem.");
+            }
+        });
+
+        // Carregar URLs de imagens salvas do servidor
+        async function loadImages() {
+            const response = await fetch("/images");
+            const images = await response.json();
+
+            imageGallery.innerHTML = "";
+            images.forEach((url) => {
+                const img = document.createElement("img");
+                img.src = url;
+                img.alt = "Imagem publicada";
+                img.style.width = "200px";
+                img.style.margin = "10px";
+                imageGallery.appendChild(img);
+            });
+        }
+
+        // Carregar imagens ao abrir a página
+        loadImages();
+    </script>
+</body>
+</html>
