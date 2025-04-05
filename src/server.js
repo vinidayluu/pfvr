@@ -1,115 +1,75 @@
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
-const bodyParser = require("body-parser");
+const fs = require("fs");
 
 const app = express();
-const dataFile = path.join(__dirname, "youtube_urls.json"); // Arquivo para armazenar as URLs
-const imagesFile = path.join(__dirname, "images.json"); // Arquivo para armazenar as URLs de imagens
+const PORT = process.env.PORT || 10000; // Render usa essa variável de ambiente
 
-console.log("Iniciando o servidor...");
+const IMAGES_FILE = path.join(__dirname, "images.json");
 
-// Middleware para processar dados enviados no corpo da requisição
-app.use(bodyParser.json());
-app.use(express.static(__dirname));
+// Middleware para servir arquivos estáticos e processar JSON
+app.use(express.static(path.join(__dirname)));
+app.use(express.json());
 
-// Rota para o index.html
+// Função para ler imagens do arquivo JSON
+const readImages = () => {
+    if (!fs.existsSync(IMAGES_FILE)) return [];
+    const data = fs.readFileSync(IMAGES_FILE, "utf-8");
+    return JSON.parse(data);
+};
+
+// Função para salvar imagens no arquivo JSON
+const saveImages = (images) => {
+    fs.writeFileSync(IMAGES_FILE, JSON.stringify(images, null, 2), "utf-8");
+};
+
+// Rota principal para exibir o site
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
-});
-
-// Rota para o news.html
-app.get("/news", (req, res) => {
     res.sendFile(path.join(__dirname, "news.html"));
 });
 
-// Rota para salvar uma URL de vídeo do YouTube
-app.post("/save-video-url", (req, res) => {
-    const { url } = req.body;
-
-    if (!url) {
-        return res.status(400).send("URL é obrigatória.");
-    }
-
-    // Leia as URLs existentes no arquivo JSON
-    fs.readFile(dataFile, "utf8", (err, data) => {
-        if (err && err.code !== "ENOENT") {
-            console.error("Erro ao ler o arquivo:", err);
-            return res.status(500).send("Erro no servidor");
-        }
-
-        const urls = data ? JSON.parse(data) : [];
-        urls.push(url);
-
-        // Salve as URLs atualizadas no arquivo JSON
-        fs.writeFile(dataFile, JSON.stringify(urls, null, 2), (err) => {
-            if (err) {
-                console.error("Erro ao salvar as URLs:", err);
-                return res.status(500).send("Erro no servidor");
-            }
-
-            res.status(200).send("URL salva com sucesso!");
-        });
-    });
-});
-
-// Rota para listar as URLs salvas
-app.get("/video-urls", (req, res) => {
-    fs.readFile(dataFile, "utf8", (err, data) => {
-        if (err && err.code !== "ENOENT") {
-            console.error("Erro ao ler o arquivo:", err);
-            return res.status(500).send("Erro no servidor");
-        }
-
-        const urls = data ? JSON.parse(data) : [];
-        res.json(urls);
-    });
-});
-
-// Rota para salvar uma URL de imagem
-app.post("/save-image", (req, res) => {
-    const { url } = req.body;
-
-    if (!url) {
-        return res.status(400).send("URL da imagem é obrigatória.");
-    }
-
-    // Leia as URLs existentes no arquivo JSON
-    fs.readFile(imagesFile, "utf8", (err, data) => {
-        if (err && err.code !== "ENOENT") {
-            console.error("Erro ao ler o arquivo:", err);
-            return res.status(500).send("Erro no servidor");
-        }
-
-        const images = data ? JSON.parse(data) : [];
-        images.push(url);
-
-        // Salve as URLs atualizadas no arquivo JSON
-        fs.writeFile(imagesFile, JSON.stringify(images, null, 2), (err) => {
-            if (err) {
-                console.error("Erro ao salvar as URLs:", err);
-                return res.status(500).send("Erro no servidor");
-            }
-
-            res.status(200).send("URL da imagem salva com sucesso!");
-        });
-    });
-});
-
-// Rota para listar as URLs de imagens salvas
+// Rota para obter imagens
 app.get("/images", (req, res) => {
-    fs.readFile(imagesFile, "utf8", (err, data) => {
-        if (err && err.code !== "ENOENT") {
-            console.error("Erro ao ler o arquivo:", err);
-            return res.status(500).send("Erro no servidor");
-        }
-
-        const images = data ? JSON.parse(data) : [];
-        res.json(images);
-    });
+    res.json(readImages());
 });
 
-// Iniciar o servidor na porta 3000
-app.listen(3000, () => {
-    console.log("Servidor rodando em http://localhost:3000");
+// Rota para adicionar imagem
+app.post("/save-image", (req, res) => {
+    const { url, title, caption } = req.body;
+    if (!url || !title || !caption) {
+        return res.status(400).send("Todos os campos são obrigatórios.");
+    }
+
+    const images = readImages();
+    const newImage = { id: Date.now(), url, title, caption };
+    images.push(newImage);
+    saveImages(images);
+
+    res.status(201).json(newImage);
 });
+
+// Rota para excluir imagem (apenas admin)
+app.delete("/delete-image/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    let images = readImages();
+    const imageIndex = images.findIndex(img => img.id === id);
+
+    if (imageIndex === -1) {
+        return res.status(404).send("Imagem não encontrada.");
+    }
+
+    images.splice(imageIndex, 1);
+    saveImages(images);
+
+    res.send("Imagem removida com sucesso.");
+});
+
+// Iniciar servidor no Render
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
+
+
+
+
+

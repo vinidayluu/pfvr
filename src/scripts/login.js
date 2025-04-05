@@ -1,9 +1,8 @@
-// File: /javascript-login-website/javascript-login-website/src/scripts/login.js
-// Lista de usuários e senhas
+// Lista de usuários e senhas com roles
 const users = [
-    { username: "admin", password: "4321" },
-    { username: "user1", password: "1234" },
-    { username: "user2", password: "5678" }
+    { username: "admin", password: "4321", role: "admin" },
+    { username: "user1", password: "1234", role: "user" },
+    { username: "user2", password: "5678", role: "user" }
 ];
 
 document.getElementById("loginForm").addEventListener("submit", function (event) {
@@ -12,20 +11,33 @@ document.getElementById("loginForm").addEventListener("submit", function (event)
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    // Verifica se o usuário e a senha correspondem a algum item na lista
+    // Busca o usuário na lista
     const userFound = users.find(user => user.username === username && user.password === password);
 
     if (userFound) {
-        // Salva o usuário logado no sessionStorage
-        sessionStorage.setItem("loggedInUser", userFound.username);
+        // Salva como JSON no sessionStorage
+        sessionStorage.setItem("loggedInUser", JSON.stringify(userFound));
 
-        // Redireciona para a página de notícias
-        window.location.href = "./news.html";
+        // Redireciona para a galeria
+        window.location.href = "./news.html"; 
     } else {
-        // Exibe a mensagem de erro
         const errorMessage = document.getElementById("error-message");
         errorMessage.style.display = "block";
-        errorMessage.textContent = "Usuário ou senha incorretos!";
+        errorMessage.textContent = "Usuário ou senha incorretos.";
     }
+    document.addEventListener("DOMContentLoaded", () => {
+        const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    
+        if (!user) {
+            window.location.href = "index.html"; // Redireciona para login se não estiver logado
+        }
+    
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            sessionStorage.removeItem("loggedInUser"); // Remove o usuário da sessão
+            window.location.href = "index.html"; // Redireciona para login
+        });
+    });
+    
 });
+
 

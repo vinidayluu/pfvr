@@ -3,257 +3,371 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Notícias</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <title>Notícias</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            background-color: #c4170c;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        .header button {
+            background-color: white;
+            color: #c4170c;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        .news-section {
+            width: 600px;
+        }
+
+        .news-item {
+            background: white;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .news-title {
+            color: #000;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .news-description {
+            font-size: 15px;
+            color: #444;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .news-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .news-item a {
+            color: #1DA1F2;
+            text-decoration: none;
+        }
+
+        .news-item a:hover {
+            text-decoration: underline;
+        }
+
+        .delete-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 5px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .publish-button {
+            background-color: #c4170c;
+            color: white;
+            padding: 10px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .publish-button:hover {
+            background-color: #a6140b;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            margin: 5px;
+        }
+    </style>
 </head>
 <body>
-    <div class="news-container">
-        <!-- Botão de Logout -->
-        <button id="logoutButton" class="logout-button">Logout</button>
-        <h1 id="welcomeMessage">Bem-vindo ao Portal de Notícias!</h1>
-        <!-- Formulário para adicionar notícias (apenas para admin) -->
-        <form id="newsForm" style="display: none;">
-            <h2>Adicionar Notícia</h2>
-            <label for="newsTitle">Título:</label>
-            <input type="text" id="newsTitle" required>
-            
-            <!-- Campo para URL da imagem -->
-            <label for="newsImageUrl">URL da Imagem:</label>
-            <input type="text" id="newsImageUrl" placeholder="https://exemplo.com/imagem.jpg">
-            
-            <!-- Campo para upload de imagem local -->
-            <label for="newsImageFile">Ou selecione uma imagem:</label>
-            <input type="file" id="newsImageFile" accept="image/*">
-            
-            <!-- Campo para URL de vídeo -->
-            <label for="newsVideoUrl">URL do Vídeo:</label>
-            <input type="text" id="newsVideoUrl" placeholder="https://exemplo.com/video.mp4">
-            
-            <!-- Novo campo para URL do YouTube -->
-            <label for="youtubeVideoUrl">URL do YouTube:</label>
-            <input type="text" id="youtubeVideoUrl" placeholder="https://www.youtube.com/watch?v=exemplo" />
+    <div class="header">
+        <div>📰 Notícias</div>
+        <button onclick="logout()">Logout</button>
+    </div>
 
-            <!-- Campo para upload de vídeo local -->
-            <label for="newsVideoFile">Ou selecione um vídeo:</label>
-            <input type="file" id="newsVideoFile" accept="video/*">
-            
-            <label for="newsContent">Conteúdo:</label>
-            <textarea id="newsContent" rows="4" required></textarea>
-            <button type="submit">Adicionar Notícia</button>
-        </form>
-        <!-- Notícia Principal -->
-        <div id="mainNews" class="main-news" style="display: none;">
-            <!-- A notícia principal será adicionada dinamicamente -->
-        </div>
-        <!-- Lista de Notícias -->
-        <div id="newsList" class="news-grid">
-            <!-- As notícias serão adicionadas aqui dinamicamente -->
+    <div class="container">
+        <div class="news-section">
+            <button id="openModalButton" class="publish-button">Publicar Notícia</button>
+            <div id="newsContainer"></div>
         </div>
     </div>
-    <h1>Salvar URLs de Vídeos do YouTube</h1>
-    <form id="videoForm">
-        <label for="videoUrl">URL do Vídeo:</label>
-        <input type="url" id="videoUrl" name="videoUrl" required>
-        <button type="submit">Salvar</button>
-    </form>
 
-    <h2>Vídeos Salvos:</h2>
-    <ul id="videoList"></ul>
+    <!-- Modal -->
+    <div id="publishModal" class="modal">
+        <div class="modal-content">
+            <h2>📝 Publicar Notícia</h2>
+            <input type="text" id="newsTitle" placeholder="Título da notícia">
+            <input type="text" id="newsCaption" placeholder="Descrição da notícia">
+            <input type="text" id="newsImage" placeholder="URL da imagem">
+            <div class="modal-buttons">
+                <button class="publish-button" onclick="publishNews()">Publicar</button>
+                <button onclick="closeModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
 
-    <h1>Publicar Imagens</h1>
-    <form id="imageForm">
-        <label for="imageUrl">URL da Imagem:</label>
-        <input type="url" id="imageUrl" name="imageUrl" required>
-        <button type="submit">Publicar</button>
-    </form>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
-    <h2>Imagens Publicadas:</h2>
-    <div id="imageGallery"></div>
+            if (!user) {
+                window.location.href = "./index.html";
+                return;
+            }
 
-    <script src="scripts/news.js"></script>
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+            if (user.role === "admin") {
+                document.getElementById("openModalButton").style.display = "block";
+            }
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCO6yeeeUwV13t6ZDBHUgdopZLreuvXpzU",
-            authDomain: "etectcc-74ed1.firebaseapp.com",
-            databaseURL: "https://etectcc-74ed1-default-rtdb.firebaseio.com",
-            projectId: "etectcc-74ed1",
-            storageBucket: "etectcc-74ed1.firebasestorage.app",
-            messagingSenderId: "193812584474",
-            appId: "1:193812584474:web:ecdb417609b2adb7f899a3",
-            measurementId: "G-CJB37DTED0"
+            loadNews();
+        });
+
+        function loadNews() {
+            fetch("/images")
+                .then(response => response.json())
+                .then(images => {
+                    const newsContainer = document.getElementById("newsContainer");
+                    newsContainer.innerHTML = '';
+
+                    images.forEach(image => {
+                        const newsItem = document.createElement("div");
+                        newsItem.classList.add("news-item");
+
+                        let formattedCaption = formatText(image.caption || "Descrição da notícia.");
+
+                        newsItem.innerHTML = `
+                            <div class="news-title">${image.title || "Título da Notícia"}</div>
+                            <div class="news-description">${formattedCaption}</div>
+                            ${image.url ? `<img src="${image.url}" alt="Imagem">` : ""}
+                            ${isAdmin() ? `<button class="delete-button" onclick="deleteImage('${image.id}')">Excluir</button>` : ""}
+                        `;
+
+                        newsContainer.appendChild(newsItem);
+                    });
+                });
+        }
+
+        function publishNews() {
+            const title = document.getElementById('newsTitle').value;
+            const caption = document.getElementById('newsCaption').value;
+            const imageUrl = document.getElementById('newsImage').value;
+
+            fetch('/save-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, caption, url: imageUrl })
+            }).then(() => {
+                closeModal();
+                loadNews();
+            });
+        }
+
+        function formatText(text) {
+            return text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+        }
+
+        window.deleteImage = function(id) {
+            if (!confirm("Tem certeza que deseja excluir esta notícia?")) return;
+
+            fetch(`/delete-image/${id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        loadNews();
+                    } else {
+                        alert("Erro ao excluir a notícia!");
+                    }
+                })
+                .catch(error => console.error("Erro ao excluir:", error));
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-
-        // Função para validar URLs do YouTube
-        function isValidYouTubeUrl(url) {
-            const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|.+\?v=)?([a-zA-Z0-9_-]{11})/;
-            const isValid = youtubeRegex.test(url);
-            console.log('Validando URL:', url, 'Resultado:', isValid);
-            return isValid;
+        function isAdmin() {
+            const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+            return user && user.role === "admin";
         }
 
-        // Função para extrair o ID do vídeo do YouTube
-        function extractYouTubeVideoId(url) {
-            const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|.+\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            const videoId = match ? match[1] : null;
-            console.log('Extraindo ID do vídeo:', url, 'ID:', videoId);
-            return videoId;
+        function logout() {
+            sessionStorage.removeItem("loggedInUser");
+            window.location.href = "./index.html";
         }
 
-        // Adicionar evento de validação e publicação ao formulário
-        const newsForm = document.getElementById('newsForm');
-        newsForm.addEventListener('submit', function (event) {
-            event.preventDefault(); // Impede o envio do formulário padrão
+        function closeModal() {
+            document.getElementById("publishModal").style.display = "none";
+        }
 
-            // Captura a URL do YouTube inserida
-            const youtubeUrl = document.getElementById('youtubeVideoUrl').value.trim();
-
-            // Log para depuração
-            console.log('URL do YouTube inserida:', youtubeUrl);
-
-            // Valida a URL do YouTube
-            if (!isValidYouTubeUrl(youtubeUrl)) {
-                alert('Por favor, insira uma URL válida do YouTube.');
-                return;
-            }
-
-            // Extrai o ID do vídeo do YouTube
-            const videoId = extractYouTubeVideoId(youtubeUrl);
-            if (!videoId) {
-                alert('Não foi possível extrair o ID do vídeo do YouTube.');
-                return;
-            }
-
-            // Verifica se o vídeo já foi adicionado
-            const existingIframes = document.querySelectorAll('#newsList iframe');
-            for (const iframe of existingIframes) {
-                if (iframe.src.includes(videoId)) {
-                    alert('Este vídeo já foi adicionado.');
-                    return;
-                }
-            }
-
-            // Cria o embed URL
-            const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-            console.log('URL embed gerada:', embedUrl);
-
-            // Cria um iframe para exibir o vídeo
-            const iframe = document.createElement('iframe');
-            iframe.src = embedUrl;
-            iframe.width = "560";
-            iframe.height = "315";
-            iframe.frameBorder = "0";
-            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            iframe.allowFullscreen = true;
-
-            // Adiciona o iframe à lista de notícias
-            const newsList = document.getElementById('newsList');
-            const newsItem = document.createElement('div');
-            newsItem.className = 'news-item';
-            newsItem.appendChild(iframe);
-            newsList.appendChild(newsItem);
-
-            // Limpa o campo de URL do YouTube após a publicação
-            document.getElementById('youtubeVideoUrl').value = '';
-
-            // Log para depuração
-            console.log('Vídeo publicado com sucesso!');
+        document.getElementById("openModalButton").addEventListener("click", () => {
+            document.getElementById("publishModal").style.display = "flex";
         });
+        document.addEventListener("DOMContentLoaded", () => {
+        const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
-        const videoForm = document.getElementById("videoForm");
-        const videoList = document.getElementById("videoList");
-
-        // Enviar URL para o servidor
-        videoForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const url = document.getElementById("videoUrl").value;
-
-            const response = await fetch("/save-video-url", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ url }),
-            });
-
-            if (response.ok) {
-                alert("URL salva com sucesso!");
-                videoForm.reset();
-                loadVideoUrls(); // Atualizar a lista de URLs
-            } else {
-                alert("Erro ao salvar a URL.");
-            }
-        });
-
-        // Carregar URLs salvas do servidor
-        async function loadVideoUrls() {
-            const response = await fetch("/video-urls");
-            const urls = await response.json();
-
-            videoList.innerHTML = "";
-            urls.forEach((url) => {
-                const li = document.createElement("li");
-                li.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
-                videoList.appendChild(li);
-            });
+        if (!user) {
+            window.location.href = "./index.html";
+            return;
         }
 
-        // Carregar URLs ao abrir a página
-        loadVideoUrls();
-
-        const imageForm = document.getElementById("imageForm");
-        const imageGallery = document.getElementById("imageGallery");
-
-        // Enviar URL da imagem para o servidor
-        imageForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const url = document.getElementById("imageUrl").value;
-
-            const response = await fetch("/save-image", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ url }),
-            });
-
-            if (response.ok) {
-                alert("Imagem publicada com sucesso!");
-                imageForm.reset();
-                loadImages(); // Atualizar a galeria de imagens
-            } else {
-                alert("Erro ao publicar a imagem.");
-            }
-        });
-
-        // Carregar URLs de imagens salvas do servidor
-        async function loadImages() {
-            const response = await fetch("/images");
-            const images = await response.json();
-
-            imageGallery.innerHTML = "";
-            images.forEach((url) => {
-                const img = document.createElement("img");
-                img.src = url;
-                img.alt = "Imagem publicada";
-                img.style.width = "200px";
-                img.style.margin = "10px";
-                imageGallery.appendChild(img);
-            });
+        // Se não for admin, esconder o botão de publicar
+        if (user.role !== "admin") {
+            document.getElementById("openModalButton").style.display = "none";
         }
 
-        // Carregar imagens ao abrir a página
-        loadImages();
+        loadNews();
+    });
+
+    function publishNews() {
+        const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
+        // Impedir usuários não admins de publicar
+        if (!user || user.role !== "admin") {
+            alert("Apenas administradores podem publicar notícias!");
+            return;
+        }
+
+        const title = document.getElementById('newsTitle').value;
+        const caption = document.getElementById('newsCaption').value;
+        const imageUrl = document.getElementById('newsImage').value;
+
+        fetch('/save-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, caption, url: imageUrl })
+        }).then(() => {
+            closeModal();
+            loadNews();
+        });
+    }
+
+    function isAdmin() {
+        const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+        return user && user.role === "admin";
+    }
+
+    function logout() {
+        sessionStorage.removeItem("loggedInUser");
+        window.location.href = "./index.html";
+    }
+
+    function closeModal() {
+        document.getElementById("publishModal").style.display = "none";
+    }
+
+    document.getElementById("openModalButton").addEventListener("click", () => {
+        if (isAdmin()) {
+            document.getElementById("publishModal").style.display = "flex";
+        } else {
+            alert("Apenas administradores podem publicar notícias!");
+        }
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
